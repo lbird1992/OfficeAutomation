@@ -23,6 +23,7 @@ END_MESSAGE_MAP()
 
 COfficeAutomationClientApp::COfficeAutomationClientApp()
 {
+
 	// 支持重新启动管理器
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART;
 
@@ -46,23 +47,40 @@ COfficeAutomationClientApp::COfficeAutomationClientApp()
     packet = m_peer->Receive();
     if( packet)
     {
-      if( packet->data[0] == ID_CONNECTION_REQUEST_ACCEPTED)
+		/*char tmp[16];
+		sprintf(tmp, "%d", packet->data[0]);
+		MessageBox(0, tmp, 0, MB_OK);*/
+		if( packet->data[0] == ID_CONNECTION_REQUEST_ACCEPTED)
+		{
+			m_serverAddress = packet->systemAddress;
+			m_peer->DeallocatePacket( packet);
+			break;
+		}else if( packet->data[0] == ID_NO_FREE_INCOMING_CONNECTIONS)
+			{
+				MessageBox( NULL, "服务器人数已满，请稍后再试", "错误", MB_OK);
+				exit(0);
+			}
+			else if(  packet->data[0] == ID_CONNECTION_ATTEMPT_FAILED)
+			{
+				MessageBox( NULL, "连接服务器失败", "错误", MB_OK);
+				exit(0);
+			}
+      else if( packet->data[0] == ID_ALREADY_CONNECTED)
       {
-        m_serverAddress = packet->systemAddress;
-        m_peer->DeallocatePacket( packet);
-        break;
+        MessageBox( NULL, "已经连接", "错误", MB_OK);
+        exit(0);
       }
       else
         m_peer->DeallocatePacket( packet);
     }
     else
       ++isConn;
-    if( isConn >= 5)
+    if( isConn >= 35)
     {
       MessageBox( NULL, "连接服务器超时", "错误", MB_OK);
       exit(0);
     }
-    Sleep(300);
+    Sleep(100);
   }
 
   _beginthreadex( NULL, 0, NetRecieveThread, this, 0, NULL);

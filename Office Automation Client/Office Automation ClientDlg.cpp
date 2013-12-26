@@ -8,6 +8,7 @@
 #include "afxdialogex.h"
 #include "RakNet\BitStream.h"
 #include "PacketType.h"
+#include "ScheduleDlg.h"
 
 
 #ifdef _DEBUG
@@ -43,6 +44,7 @@ BEGIN_MESSAGE_MAP(COfficeAutomationClientDlg, CDialogEx)
   ON_BN_CLICKED(IDOK, &COfficeAutomationClientDlg::OnBnClickedOk)
   ON_BN_CLICKED(IDC_LOGIN_EXIT, &COfficeAutomationClientDlg::OnBnClickedLoginExit)
   ON_BN_CLICKED(IDC_LOGIN_LOGIN, &COfficeAutomationClientDlg::OnBnClickedLoginLogin)
+//  ON_WM_KEYDOWN()
 END_MESSAGE_MAP()
 
 
@@ -142,10 +144,10 @@ void COfficeAutomationClientDlg::OnBnClickedLoginLogin()
       bsIn.Read( theApp.m_ID);
       bsIn.Read( theApp.m_department);
       bsIn.Read( theApp.m_priority);
-      char tmp[256];
-      sprintf( tmp, "%d", theApp.m_ID);
-      MessageBox(tmp);
       theApp.m_peer->DeallocatePacket( packet);
+      CDialogEx::OnOK();
+      ScheduleDlg scheduleDlg;
+      scheduleDlg.DoModal();
     }
     else if( result == LR_ERROR)
     {
@@ -158,4 +160,28 @@ void COfficeAutomationClientDlg::OnBnClickedLoginLogin()
       theApp.m_peer->DeallocatePacket( packet);
     }
   }
+}
+
+
+//void COfficeAutomationClientDlg::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+//{
+//  // TODO: 在此添加消息处理程序代码和/或调用默认值
+//
+//  CDialogEx::OnKeyDown(nChar, nRepCnt, nFlags);
+//}
+
+
+BOOL COfficeAutomationClientDlg::PreTranslateMessage(MSG* pMsg)
+{
+  // TODO: 在此添加专用代码和/或调用基类
+  if( pMsg->message == WM_KEYDOWN)
+  {
+    if( pMsg->wParam == VK_RETURN)
+    {
+      OnBnClickedLoginLogin();
+      return TRUE;
+    }
+  }
+
+  return CDialogEx::PreTranslateMessage(pMsg);
 }
