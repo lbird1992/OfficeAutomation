@@ -30,8 +30,12 @@ public:
 
 	DECLARE_MESSAGE_MAP()
 
+public:
   RakNet::RakPeerInterface* m_peer;
   RakNet::SystemAddress m_serverAddress;
+  int m_ID;
+  int m_department;
+  int m_priority;
 
   static unsigned WINAPI NetRecieveThread( void* pOfficeAutomationClientApp);
   void Exit();

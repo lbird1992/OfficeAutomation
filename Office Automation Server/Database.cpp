@@ -70,9 +70,9 @@ bool Database::QueryWithoutResult( const char* sql)
 
 void Database::QueryWithoutResultAsync( const char* sql)
 {
- // m_queryQueueLock.Lock();
+  m_queryQueueLock.Lock();
   m_queryQueue.push( sql);
- // m_queryQueueLock.Unlock();
+  m_queryQueueLock.Unlock();
 }
 
 void Database::FreeResult()

@@ -1,5 +1,4 @@
-#ifndef _PACKET_TYPE_H_
-#define _PACKET_TYPE_H_
+#pragma once
 
 #include <string>
 #include "RakNet\MessageIdentifiers.h"
@@ -14,4 +13,7 @@ enum RakNetHead
   RH_LOGIN = ID_USER_PACKET_ENUM + 1, //注册
 };
 
-#endif
+//RH_LOGIN RESULT
+const int LR_SUCCESS = 1;
+const int LR_ERROR = 2;//用户名密码错误
+const int LR_FAIL = 3;//服务器出错

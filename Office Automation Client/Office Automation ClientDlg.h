@@ -30,4 +30,9 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
   afx_msg void OnBnClickedOk();
+//  CString password;
+  CString m_name;
+  CString m_password;
+  afx_msg void OnBnClickedLoginExit();
+  afx_msg void OnBnClickedLoginLogin();
 };

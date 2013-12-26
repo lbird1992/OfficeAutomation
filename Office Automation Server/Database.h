@@ -6,7 +6,7 @@
 #include <string>
 #include <stdint.h>
 #include <mysql.h>
-//#include "ThreadLock.h"
+#include "ThreadLock.h"
 
 class Database
 {
@@ -35,7 +35,7 @@ private:
   MYSQL_RES* m_result;//½á¹û¼¯
   MYSQL_ROW m_row;
   std::queue< std::string> m_queryQueue;
-  //ThreadLock m_queryQueueLock;
+  ThreadLock m_queryQueueLock;
 };
 
 #endif

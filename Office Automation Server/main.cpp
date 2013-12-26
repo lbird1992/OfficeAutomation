@@ -1,12 +1,14 @@
 #include "Global.h"
 #include "Database.h"
+#include "Events.h"
 
 GlobalData* g_globalData;
 
 int main()
 {
-  Database database;
-  bool isConnect = database.Connect( "127.0.0.1", "root", "root", "oa", 3306, NULL);
+  g_globalData = new GlobalData();
+  g_globalData->database = new Database();
+  bool isConnect = g_globalData->database->Connect( "127.0.0.1", "root", "root", "oa", 3306, NULL);
   if( isConnect == false)
   {
     printf("连接数据库失败\n");
@@ -15,7 +17,6 @@ int main()
   }
   printf("连接数据库成功\n");
   
-  g_globalData = new GlobalData();
   g_globalData->peer = RakNet::RakPeerInterface::GetInstance();
   RakNet::Packet* packet;
   RakNet::SocketDescriptor sd( serverPort, 0);
@@ -26,7 +27,8 @@ int main()
   {
     for( packet = g_globalData->peer->Receive(); packet; packet = g_globalData->peer->Receive())
     {
-      //if( packet->data[0] == ...)
+      if( packet->data[0] == RH_LOGIN)
+        OnLogin(packet);
     }
     Sleep(200);
   }
