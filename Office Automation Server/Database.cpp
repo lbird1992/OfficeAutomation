@@ -118,10 +118,10 @@ unsigned WINAPI Database::_AsyncThread( void* pDatabase)
     {
       Sleep(1000);
     }
-   // database->m_queryQueueLock.Lock();
+    database->m_queryQueueLock.Lock();
     sql = database->m_queryQueue.front();
     database->m_queryQueue.pop();
-   // database->m_queryQueueLock.Unlock();
+    database->m_queryQueueLock.Unlock();
     mysql_query( &database->m_mysqlHandle, sql.c_str());
   }
 }

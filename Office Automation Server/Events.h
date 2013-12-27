@@ -1,6 +1,8 @@
 #ifndef _EVENTS_H_
 #define _EVENTS_H_
 
-void OnLogin(void* packet);
+#include "ThreadPool.h"
+
+void WINAPI OnLogin( PTP_CALLBACK_INSTANCE pInstance, void* packet);
 
 #endif

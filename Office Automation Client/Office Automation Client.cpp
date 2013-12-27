@@ -28,44 +28,6 @@ COfficeAutomationClientApp::COfficeAutomationClientApp()
 
 	// TODO: 在此处添加构造代码，
 	// 将所有重要的初始化放置在 InitInstance 中
-  RakNet::SocketDescriptor sd;
-  RakNet::Packet* packet;
-  m_peer = RakNet::RakPeerInterface::GetInstance();
-  m_peer->Startup( 1, &sd, 1);
-  bool rs = (m_peer->Connect( serverIP.c_str(), serverPort, 0, 0)
-    == RakNet::CONNECTION_ATTEMPT_STARTED);
-  if( !rs)
-  {
-    MessageBox( NULL, "连接服务器失败", "错误", MB_OK);
-    exit(0);
-  }
-
-  int isConn = 0;
-	while(1)
-  {
-    packet = m_peer->Receive();
-    if( packet)
-    {
-      if( packet->data[0] == ID_CONNECTION_REQUEST_ACCEPTED)
-      {
-        m_serverAddress = packet->systemAddress;
-        m_peer->DeallocatePacket( packet);
-        break;
-      }
-      else
-        m_peer->DeallocatePacket( packet);
-    }
-    else
-      ++isConn;
-    if( isConn >= 5)
-    {
-      MessageBox( NULL, "连接服务器超时", "错误", MB_OK);
-      exit(0);
-    }
-    Sleep(300);
-  }
-
-  _beginthreadex( NULL, 0, NetRecieveThread, this, 0, NULL);
 }
 
 
@@ -141,5 +103,7 @@ BOOL COfficeAutomationClientApp::InitInstance()
 
 void COfficeAutomationClientApp::Exit()
 {
-  exit(0);
+  //RakNet::RakPeerInterface::DestroyInstance( m_peer);
+  m_peer->Shutdown( 100);
+  ::ExitProcess(0);
 }

@@ -23,4 +23,5 @@ protected:
 public:
   afx_msg void OnBnClickedCancel();
   CListCtrl m_lstWork;
+  afx_msg void OnBnClickedScheduleExit();
 };

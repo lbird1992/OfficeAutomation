@@ -35,4 +35,6 @@ public:
   CString m_password;
   afx_msg void OnBnClickedLoginExit();
   afx_msg void OnBnClickedLoginLogin();
+//  afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+  virtual BOOL PreTranslateMessage(MSG* pMsg);
 };

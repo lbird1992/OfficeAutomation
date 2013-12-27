@@ -2,7 +2,7 @@
 #include "Events.h"
 #include "Global.h"
 
-void OnLogin( void* packet)
+void WINAPI OnLogin( PTP_CALLBACK_INSTANCE pInstance, void* packet)
 {
   RakNet::Packet* pIn = (RakNet::Packet*)packet;
   RakNet::BitStream bsIn(pIn->data, pIn->length, false);
@@ -12,6 +12,7 @@ void OnLogin( void* packet)
   bsIn.Read( password);
   char sqlCmd[1024];
   sprintf( sqlCmd, "SELECT id,department,priority FROM account WHERE name='%s' AND password='%s'", username.C_String(), password.C_String());
+  g_globalData->databaseLock.Lock();
   int count = g_globalData->database->QueryWithResult(sqlCmd);
   RakNet::BitStream bsOut;
   bsOut.Write( (RakNet::MessageID)RH_LOGIN);
@@ -24,11 +25,20 @@ void OnLogin( void* packet)
   {
     g_globalData->database->FetchRow();
     bsOut.Write( LR_SUCCESS);
-    bsOut.Write( g_globalData->database->GetResultInt(0));
+    int ID = g_globalData->database->GetResultInt(0);
+    bsOut.Write( ID);
     bsOut.Write( g_globalData->database->GetResultInt(1));
     bsOut.Write( g_globalData->database->GetResultInt(2));
     printf("%sµÇÂ¼³É¹¦.\n", username.C_String());
+    g_globalData->addressMap[ID] = pIn->systemAddress;
   }
+  g_globalData->database->FreeResult();
+  g_globalData->databaseLock.Unlock();
   g_globalData->peer->Send( &bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pIn->systemAddress, false);
   g_globalData->peer->DeallocatePacket( pIn);
+
+  if( count != 0)
+  {
+
+  }
 }

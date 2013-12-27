@@ -8,6 +8,7 @@
 #include "afxdialogex.h"
 #include "RakNet\BitStream.h"
 #include "PacketType.h"
+#include "ScheduleDlg.h"
 
 
 #ifdef _DEBUG
@@ -43,6 +44,7 @@ BEGIN_MESSAGE_MAP(COfficeAutomationClientDlg, CDialogEx)
   ON_BN_CLICKED(IDOK, &COfficeAutomationClientDlg::OnBnClickedOk)
   ON_BN_CLICKED(IDC_LOGIN_EXIT, &COfficeAutomationClientDlg::OnBnClickedLoginExit)
   ON_BN_CLICKED(IDC_LOGIN_LOGIN, &COfficeAutomationClientDlg::OnBnClickedLoginLogin)
+//  ON_WM_KEYDOWN()
 END_MESSAGE_MAP()
 
 
@@ -58,6 +60,63 @@ BOOL COfficeAutomationClientDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+  RakNet::SocketDescriptor sd;
+  RakNet::Packet* packet;
+  theApp.m_peer = RakNet::RakPeerInterface::GetInstance();
+  theApp.m_peer->Startup( 1, &sd, 1);
+  bool rs = (theApp.m_peer->Connect( serverIP.c_str(), serverPort, 0, 0)
+    == RakNet::CONNECTION_ATTEMPT_STARTED);
+  if( !rs)
+  {
+    MessageBox("连接服务器失败", "错误", MB_OK);
+    RakNet::RakPeerInterface::DestroyInstance( theApp.m_peer);
+    CDialogEx::OnCancel();
+  }
+
+  int isConn = 0;
+	while(1)
+  {
+    packet = theApp.m_peer->Receive();
+    if( packet)
+    {
+      if( packet->data[0] == ID_CONNECTION_REQUEST_ACCEPTED)
+      {
+        theApp.m_serverAddress = packet->systemAddress;
+        theApp.m_peer->DeallocatePacket( packet);
+        break;
+      }
+      else if( packet->data[0] == ID_NO_FREE_INCOMING_CONNECTIONS)
+			{
+				MessageBox("服务器人数已满，请稍后再试", "错误", MB_OK);
+        theApp.m_peer->Shutdown(300);
+        CDialogEx::OnCancel();
+			}
+			else if(  packet->data[0] == ID_CONNECTION_ATTEMPT_FAILED)
+			{
+				MessageBox("连接服务器失败", "错误", MB_OK);
+        theApp.m_peer->Shutdown(300);
+        CDialogEx::OnCancel();
+			}
+      else if( packet->data[0] == ID_ALREADY_CONNECTED)
+      {
+        MessageBox( "已经存在到服务器的连接", "错误", MB_OK);
+        theApp.m_peer->Shutdown(300);
+        CDialogEx::OnCancel();
+      }
+      else
+        theApp.m_peer->DeallocatePacket( packet);
+    }
+    else
+      ++isConn;
+    if( isConn >= 35)
+    {
+      MessageBox( "连接服务器超时", "错误", MB_OK);
+      theApp.m_peer->Shutdown(300);
+      CDialogEx::OnCancel();
+      break;
+    }
+    Sleep(100);
+  }
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -106,7 +165,7 @@ void COfficeAutomationClientDlg::OnBnClickedOk()
 void COfficeAutomationClientDlg::OnBnClickedLoginExit()
 {
   // TODO: 在此添加控件通知处理程序代码
-  theApp.m_peer->Shutdown(0);
+  theApp.m_peer->Shutdown(300);
   exit(0);
 }
 
@@ -142,10 +201,11 @@ void COfficeAutomationClientDlg::OnBnClickedLoginLogin()
       bsIn.Read( theApp.m_ID);
       bsIn.Read( theApp.m_department);
       bsIn.Read( theApp.m_priority);
-      char tmp[256];
-      sprintf( tmp, "%d", theApp.m_ID);
-      MessageBox(tmp);
       theApp.m_peer->DeallocatePacket( packet);
+      _beginthreadex( NULL, 0, COfficeAutomationClientApp::NetRecieveThread, &theApp, 0, NULL);
+      CDialogEx::OnOK();
+      ScheduleDlg scheduleDlg;
+      scheduleDlg.DoModal();
     }
     else if( result == LR_ERROR)
     {
@@ -158,4 +218,28 @@ void COfficeAutomationClientDlg::OnBnClickedLoginLogin()
       theApp.m_peer->DeallocatePacket( packet);
     }
   }
+}
+
+
+//void COfficeAutomationClientDlg::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+//{
+//  // TODO: 在此添加消息处理程序代码和/或调用默认值
+//
+//  CDialogEx::OnKeyDown(nChar, nRepCnt, nFlags);
+//}
+
+
+BOOL COfficeAutomationClientDlg::PreTranslateMessage(MSG* pMsg)
+{
+  // TODO: 在此添加专用代码和/或调用基类
+  if( pMsg->message == WM_KEYDOWN)
+  {
+    if( pMsg->wParam == VK_RETURN)
+    {
+      OnBnClickedLoginLogin();
+      return TRUE;
+    }
+  }
+
+  return CDialogEx::PreTranslateMessage(pMsg);
 }

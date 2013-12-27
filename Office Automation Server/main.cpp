@@ -6,6 +6,7 @@ GlobalData* g_globalData;
 
 int main()
 {
+  system("ipconfig");
   g_globalData = new GlobalData();
   g_globalData->database = new Database();
   bool isConnect = g_globalData->database->Connect( "127.0.0.1", "root", "root", "oa", 3306, NULL);
@@ -27,8 +28,20 @@ int main()
   {
     for( packet = g_globalData->peer->Receive(); packet; packet = g_globalData->peer->Receive())
     {
-      if( packet->data[0] == RH_LOGIN)
-        OnLogin(packet);
+      if( packet->data[0] == ID_NEW_INCOMING_CONNECTION)
+      {
+        printf("接收新的连接.\n");
+        g_globalData->peer->DeallocatePacket( packet);
+      }
+      else if( packet->data[0] == ID_DISCONNECTION_NOTIFICATION || packet->data[0] == ID_CONNECTION_LOST)
+      {
+        printf("失去一个客户端的连接.\n");
+        g_globalData->peer->DeallocatePacket( packet);
+      }
+      else if( packet->data[0] == RH_LOGIN)
+      {
+        g_globalData->threadPool.RunFunction( OnLogin, packet);
+      }
     }
     Sleep(200);
   }

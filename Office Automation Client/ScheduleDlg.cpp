@@ -30,6 +30,7 @@ void ScheduleDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(ScheduleDlg, CDialogEx)
   ON_BN_CLICKED(IDCANCEL, &ScheduleDlg::OnBnClickedCancel)
+  ON_BN_CLICKED(IDC_SCHEDULE_EXIT, &ScheduleDlg::OnBnClickedScheduleExit)
 END_MESSAGE_MAP()
 
 
@@ -44,5 +45,15 @@ void ScheduleDlg::OnBnClickedCancel()
     return;
   }
   // TODO： 发送下班信息到服务器
+  theApp.m_peer->Shutdown(300);
   CDialogEx::OnCancel();
+  //RakNet::RakPeerInterface::DestroyInstance( theApp.m_peer);
+
+}
+
+
+void ScheduleDlg::OnBnClickedScheduleExit()
+{
+  // TODO: 在此添加控件通知处理程序代码
+  OnBnClickedCancel();
 }
