@@ -204,8 +204,7 @@ void COfficeAutomationClientDlg::OnBnClickedLoginLogin()
       theApp.m_peer->DeallocatePacket( packet);
       _beginthreadex( NULL, 0, COfficeAutomationClientApp::NetRecieveThread, &theApp, 0, NULL);
       CDialogEx::OnOK();
-      ScheduleDlg scheduleDlg;
-      scheduleDlg.DoModal();
+      theApp.m_scheduleDlg.DoModal();
     }
     else if( result == LR_ERROR)
     {

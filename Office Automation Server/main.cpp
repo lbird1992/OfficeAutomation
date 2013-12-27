@@ -51,19 +51,38 @@ int main()
   {
     for( packet = g_globalData->peer->Receive(); packet; packet = g_globalData->peer->Receive())
     {
-      if( packet->data[0] == ID_NEW_INCOMING_CONNECTION)
-      {
-        printf("接收新的连接.\n");
-        g_globalData->peer->DeallocatePacket( packet);
-      }
-      else if( packet->data[0] == ID_DISCONNECTION_NOTIFICATION || packet->data[0] == ID_CONNECTION_LOST)
+      if( packet->data[0] == ID_DISCONNECTION_NOTIFICATION || packet->data[0] == ID_CONNECTION_LOST)
       {
         printf("失去一个客户端的连接.\n");
+        for( map<int,RakNet::SystemAddress>::iterator iter = g_globalData->addressMap.begin();
+          iter != g_globalData->addressMap.end(); )
+        {
+          if( iter->second == packet->systemAddress)
+          {
+            char sqlCmd[1024];
+            sprintf(sqlCmd, "INSERT INTO attendance SET user=%d,type=2", iter->first);
+            g_globalData->databaseLock.Lock();
+            g_globalData->database->QueryWithoutResult( sqlCmd);
+            g_globalData->databaseLock.Unlock();
+            g_globalData->addressMap.erase( iter);
+            break;
+          }
+          else
+            iter++;
+        }
         g_globalData->peer->DeallocatePacket( packet);
       }
       else if( packet->data[0] == RH_LOGIN)
       {
         g_globalData->threadPool.RunFunction( OnLogin, packet);
+      }
+      else if( packet->data[0] == RH_SCHEDULE)
+      {
+        g_globalData->threadPool.RunFunction( OnSchedule, packet);
+      }
+      else
+      {
+        g_globalData->peer->DeallocatePacket( packet);
       }
     }
     Sleep(200);

@@ -3,6 +3,12 @@
 #include "afxcmn.h"
 
 
+#define WM_SHOWTASK (WM_USER +1)
+#define WM_UPDATELIST (WM_SHOWTASK+1)
+#define IDR_SHOW 11
+#define IDR_OTHER 12
+#define IDR_EXIT 13
+
 // ScheduleDlg ¶Ô»°¿ò
 
 class ScheduleDlg : public CDialogEx
@@ -28,4 +34,12 @@ public:
   CListCtrl m_lstWork;
   afx_msg void OnBnClickedScheduleExit();
   afx_msg void OnBnClickedScheduleBtnhide();
+protected:
+  afx_msg LRESULT OnUpdateList(WPARAM wParam, LPARAM lParam);
+  int m_timerCount;
+public:
+  virtual BOOL OnInitDialog();
+  afx_msg void OnTimer(UINT_PTR nIDEvent);
+  afx_msg void OnBnClickedScheduleBtndeletework();
+  afx_msg void OnBnClickedScheduleBtntoaddwork();
 };
